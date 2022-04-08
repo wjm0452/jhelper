@@ -16,7 +16,7 @@
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%!
-	private String jndiName = "jdbc/seize";
+	private String jndiName = "jdbc/app";
 	private JdbcTemplate jdbcTemplate;
 	private ObjectMapper objectMapper = new ObjectMapper();
 
