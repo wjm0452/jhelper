@@ -1,0 +1,48 @@
+<root>
+  <sql id="table">
+    SELECT TABNAME AS TABLE_NAME,
+           REMARKS AS COMMENTS
+      FROM SYSCAT.TABLES
+     WHERE OWNER = '{{owner}}'
+       AND TABSCHEMA = '{{owner}}'
+       AND TYPE = 'T'
+       {{#tableName}}
+       AND (TABNAME = '{{tableName}}' OR REMARKS LIKE '%' || '{{tableName}}' || '%')
+       {{/tableName}}
+       FOR READ ONLY WITH UR
+  </sql>
+  <sql id="columns">
+    SELECT A.TABNAME AS TABLE_NAME,
+           B.COLNAME AS COLUMN_NAME,
+           B.REMARKS AS COMMENTS
+      FROM SYSCAT.TABLES A
+      JOIN SYSCAT.COLUMNS B
+        ON A.TABNAME = B.TABNAME
+     WHERE A.OWNER = '{{owner}}'
+       AND A.TABSCHEMA = '{{owner}}'
+       AND A.TYPE = 'T'
+       {{#tableName}}
+       AND (A.TABNAME = '{{tableName}}' OR A.REMARKS LIKE '%' || '{{tableName}}' || '%')
+       {{/tableName}}
+       {{#columnName}}
+       AND (B.COLNAME = '{{columnName}}' OR B.REMARKS LIKE '%' || '{{columnName}}' || '%')
+       {{/columnName}}
+    ORDER BY A.TABNAME,
+             B.COLNO
+      FOR READ ONLY WITH UR
+  </sql>
+  <sql id="indexes">
+    SELECT B.COLNAME AS INDEX_COLUMN
+      FROM SYSCAT.INDEXES A
+      JOIN SYSCAT.INDEXCOLUSE B
+        ON A.INDNAME = B.INDNAME
+      JOIN SYSCAT.COLUMNS C
+        ON A.TABNAME = C.TABNAME
+       AND B.COLNAME = C.COLNAME
+     WHERE A.OWNER = '{{owner}}'
+       AND A.INDSCHEMA = '{{owner}}'
+       AND A.TABNAME = '{{tableName}}'
+     ORDER BY C.COLNO
+       FOR READ ONLY WITH UR
+  </sql>
+</root>
