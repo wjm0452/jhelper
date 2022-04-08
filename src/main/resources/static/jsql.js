@@ -5,7 +5,7 @@
 	jsql.TABLE_PREFIX = 'T_';
 	jsql.url = '/api/sql';
 
-	jsql.query = function (text) {
+	jsql.query = function (text, params) {
 
 		text = text.trim();
 
@@ -16,7 +16,8 @@
 		//sql = window.encodeURIComponent(sql);
 
 		return axios.post(jsql.url, {
-			query: text
+			query: text,
+			params
 		}).then(function (res) {
 			return res.data;
 		}).catch(function (response) {
