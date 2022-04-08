@@ -193,7 +193,7 @@
 
 		});
 
-		jsql.loadTemplate('oracle').then(function() {
+		jsql.loadTemplate('oracle').then(function () {
 			$('#tableArea').find('#btnFindTable').trigger('click');
 		});
 	});
@@ -205,7 +205,7 @@
 		cus["/*+"] = "*/";
 		cus["//"] = "\n";
 		cus["\'"] = "\'";
-	
+
 		return new TextTokenizer(sql, cus);
 	}
 
@@ -260,39 +260,38 @@
 	}
 
 	/**
-     * caret selection
-     * 
-     * @memberof cb
-     * @param {element} element
-     * @param {number} begin block할 시작지점
-     * @param {number} end block할 종료지점
-     */
-	 function caret(element, begin, end) {
-    	
-    	if(element instanceof jQuery) {
-    		element = element[0];
-    	}
-    	
-    	if(element.disabled) {
-    		return;
-    	}
-    	
-    	if(element.selectionStart != undefined) {
-    		
-    		if(begin == undefined) {
-    			return [ element.selectionStart, element.selectionEnd ];
-    		}
-    		else {
-    			
-    			if(end == null) {
-    				end = begin;
-    			}
-    			
-    			element.focus();
-    			element.setSelectionRange(begin, end);
-    		}
-    		
-    	}
-    }
+	 * caret selection
+	 * 
+	 * @memberof cb
+	 * @param {element} element
+	 * @param {number} begin block할 시작지점
+	 * @param {number} end block할 종료지점
+	 */
+	function caret(element, begin, end) {
+
+		if (element instanceof jQuery) {
+			element = element[0];
+		}
+
+		if (element.disabled) {
+			return;
+		}
+
+		if (element.selectionStart != undefined) {
+
+			if (begin == undefined) {
+				return [element.selectionStart, element.selectionEnd];
+			} else {
+
+				if (end == null) {
+					end = begin;
+				}
+
+				element.focus();
+				element.setSelectionRange(begin, end);
+			}
+
+		}
+	}
 
 })();

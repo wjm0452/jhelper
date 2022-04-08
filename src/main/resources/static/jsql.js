@@ -3,6 +3,7 @@
 	var jsql = {};
 
 	jsql.TABLE_PREFIX = 'T_';
+	jsql.url = '/api/sql';
 
 	jsql.query = function (text) {
 
@@ -14,7 +15,7 @@
 
 		//sql = window.encodeURIComponent(sql);
 
-		return axios.post('/api/sql', {
+		return axios.post(jsql.url, {
 			query: text
 		}).then(function (res) {
 			return res.data;
