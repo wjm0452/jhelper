@@ -8,7 +8,7 @@
 
 			jsql.query(sql).then(function (data, status, e) {
 				drawTable($('#resultArea'), data);
-				$('#rowcount').text(data.rowcount || 0);
+				$('#rowCount').text(data.result.length || 0);
 			});
 
 		});
@@ -54,7 +54,7 @@
 
 				jsql.query(sql.substring(start, end)).then(function (data, status, e) {
 					drawTable($('#resultArea'), data);
-					$('#rowcount').text(data.rowcount || 0);
+					$('#rowCount').text(data.result.length || 0);
 				});
 
 			} else if (e.ctrlKey && e.keyCode == 76) {
