@@ -26,7 +26,7 @@
 	};
 
 	jsql.loadTemplate = function (vendor) {
-		return axios.get('/vendor/' + vendor + ".xml").then(function (res) {
+		return axios.get('vendor/' + vendor + ".xml").then(function (res) {
 			var sqlNode = $(res.data);
 			var tableQuery = sqlNode.find('#table').html(),
 				columnQuery = sqlNode.find('#columns').html(),
