@@ -28,7 +28,7 @@ function Jsql(options) {
 			return res.data;
 		}).catch(function (response) {
 			alert('오류가 발생하였습니다.');
-			return $.Deferred().reject(response);
+			return response;
 		});
 	};
 
@@ -37,10 +37,12 @@ function Jsql(options) {
 		var that = this;
 
 		return axios.get('vendor/' + vendor + ".xml").then(function (res) {
-			var sqlNode = $(res.data);
-			var tableQuery = sqlNode.find('#table').html(),
-				columnQuery = sqlNode.find('#columns').html(),
-				indexesQuery = sqlNode.find('#indexes').html();
+			var sqlNode = document.createElement('div');
+			sqlNode.innerHTML = res.data;
+
+			var tableQuery = sqlNode.querySelector('#table').innerHTML,
+				columnQuery = sqlNode.querySelector('#columns').innerHTML,
+				indexesQuery = sqlNode.querySelector('#indexes').innerHTML;
 
 			that.tableTmpl = function () {
 				return tableQuery;
