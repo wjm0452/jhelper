@@ -1,5 +1,10 @@
 (function () {
 
+	var jsql = new Jsql({
+		tablePrefix: 'T_',
+		url: '/api/sql'
+	});
+
 	$(document).ready(function () {
 
 		$('#runSql').click(function (e) {
@@ -67,6 +72,12 @@
 			}
 		});
 
+		$('#selVendor').on('change', function () {
+			jsql.loadTemplate(this.value).then(function () {
+				$('#tableArea').find('#btnFindTable').trigger('click');
+			});
+		})
+
 		$('#container').on('click', '.selection', function (e) {
 
 			var $this = $(this),
@@ -75,7 +86,7 @@
 			caret($this, 0, value.length);
 		});
 
-		$('#tableArea').find('#tableList').on('click', 'tr td:first-child', function (e) {
+		$('#tableArea').find('#tables').on('click', 'tr td:first-child', function (e) {
 
 			var $this = $(this);
 			var tableName = $this.text();
@@ -91,12 +102,12 @@
 			};
 
 			jsql.findTableInfo(data).then(function (data, status, e) {
-				drawTable($('#tableList'), data);
+				drawTable($('#tables'), data);
 			});
 
 		});
 
-		$('#tableArea').find('#txtTableName').on('keydown', function (e) {
+		$('#tableArea').find('#txtOwner, #txtTableName').on('keydown', function (e) {
 			if (e.keyCode == 13) {
 				$('#tableArea').find('#btnFindTable').trigger('click');
 			}
@@ -122,7 +133,7 @@
 			};
 
 			jsql.findColumnInfo(data).then(function (data, status, e) {
-				drawTable($('#comments'), data);
+				drawTable($('#columns'), data);
 				$('#columnArea').find('#txtTableName').val(tableName);
 			});
 
@@ -193,9 +204,34 @@
 
 		});
 
-		jsql.loadTemplate('oracle').then(function () {
-			$('#tableArea').find('#btnFindTable').trigger('click');
+		$('[caching]').on('input', function () {
+			var id = this.id;
+
+			if (!id) {
+				return;
+			}
+
+			jsql.setData(id, this.value);
 		});
+
+		$('[caching]').each(function (e) {
+
+			var id = this.id;
+
+			if (!id) {
+				return;
+			}
+
+			var value = jsql.getData(id);
+
+			if (value) {
+				this.value = value;
+			}
+		});
+
+		if ($('#selVendor').val() && $('#txtOwner').val()) {
+			$('#selVendor').trigger('change');
+		}
 	});
 
 	function createSQLTokenizer(sql) {
@@ -220,43 +256,38 @@
 
 		$area.empty();
 
-		var hasMeta = false;
 		var dataList = data;
 
+		var $table = $('<table class="table"/>');
+		$table.on('click', 'tr', function () {
+			$table.find('tr.active').removeClass('active');
+			$(this).addClass('active');
+		});
+
 		if (data.result) {
-			var metadata = data.metadata;
+			var columnNames = data.columnNames;
 			dataList = data.result;
 
-			if (metadata) {
-				hasMeta = true;
-				dataList.unshift(metadata);
-			}
+			var $row = $('<tr />');
+			columnNames.forEach(function (value) {
+				$row.append('<th>' + value + '</th>');
+			});
+
+			$table.append($row);
 
 		} else {
 			dataList = data;
 		}
 
-		var $table = $('<table/>');
-
 		dataList.forEach(function (rowData, i) {
-
-			var $row = $('<tr />');
-
-			if (i == 0 && hasMeta) {
-				$row.addClass('metadata');
-			} else {
-				$row.addClass('data');
-			}
-
+			var $row = $('<tr/>');
 			rowData.forEach(function (value, i) {
 				$row.append('<td>' + value + '</td>');
 			});
-
 			$table.append($row);
 		});
 
 		$area.append($table);
-
 	}
 
 	/**

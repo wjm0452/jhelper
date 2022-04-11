@@ -1,11 +1,17 @@
-(function () {
+function Jsql(options) {
 
-	var jsql = {};
+	var _tablePrefix = '';
+	var _url = '/api/sql';
 
-	jsql.TABLE_PREFIX = 'T_';
-	jsql.url = '/api/sql';
+	if (options.tablePrefix) {
+		_tablePrefix = options.tablePrefix;
+	}
 
-	jsql.query = function (text, params) {
+	if (options.url) {
+		_url = options.url;
+	}
+
+	this.query = function (text, params) {
 
 		text = text.trim();
 
@@ -15,7 +21,7 @@
 
 		//sql = window.encodeURIComponent(sql);
 
-		return axios.post(jsql.url, {
+		return axios.post(_url, {
 			query: text,
 			params
 		}).then(function (res) {
@@ -26,70 +32,75 @@
 		});
 	};
 
-	jsql.loadTemplate = function (vendor) {
+	this.loadTemplate = function (vendor) {
+
+		var that = this;
+
 		return axios.get('vendor/' + vendor + ".xml").then(function (res) {
 			var sqlNode = $(res.data);
 			var tableQuery = sqlNode.find('#table').html(),
 				columnQuery = sqlNode.find('#columns').html(),
 				indexesQuery = sqlNode.find('#indexes').html();
 
-			jsql.tableTmpl = function () {
+			that.tableTmpl = function () {
 				return tableQuery;
 			};
-			jsql.columnsTmpl = function () {
+			that.columnsTmpl = function () {
 				return columnQuery;
 			};
-			jsql.indexesTmpl = function () {
+			that.indexesTmpl = function () {
 				return indexesQuery;
 			};
 		});
 	};
 
-	jsql.findTableInfo = function (data) {
+	this.findTableInfo = function (data) {
 
-		var tmpl = jsql.tableTmpl();
+		var tmpl = this.tableTmpl();
 		var sql = Mustache.render(tmpl, data);
 
-		return jsql.query(sql);
+		return this.query(sql);
 	};
 
-	jsql.findColumnInfo = function (data) {
+	this.findColumnInfo = function (data) {
 
-		var tmpl = jsql.columnsTmpl();
+		var tmpl = this.columnsTmpl();
 		var sql = Mustache.render(tmpl, data);
 
-		return jsql.query(sql);
+		return this.query(sql);
 	};
 
-	jsql.findIndexesInfo = function (data) {
+	this.findIndexesInfo = function (data) {
 
-		var tmpl = jsql.indexesTmpl();
+		var tmpl = this.indexesTmpl();
 		var sql = Mustache.render(tmpl, data);
 
-		return jsql.query(sql);
+		return this.query(sql);
 	};
 
-	jsql.tableTmpl = function () {
+	this.tableTmpl = function () {
 		return '';
 	};
 
-	jsql.columnsTmpl = function () {
+	this.columnsTmpl = function () {
 		return '';
 	};
 
-	jsql.indexesTmpl = function () {
+	this.indexesTmpl = function () {
 		return '';
 	};
 
 
-	jsql.selectQuery = function (data) {
+	this.selectQuery = function (data) {
 
 		if (!data.owner || !data.tableName) {
 			alert('owner, tableName을 입력해주세요.');
 			return;
 		}
 
-		return Promise.all([jsql.findColumnInfo(data), jsql.findIndexesInfo(data)]).then(function (returnValue) {
+		var that = this;
+
+		return Promise.all([this.findColumnInfo(data), this.findIndexesInfo(data)]).then(function (returnValue) {
 
 			var columns = returnValue[0].result,
 				indexes = returnValue[1].result;
@@ -102,7 +113,7 @@
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(jsql.TABLE_PREFIX, 'SELECT_'));
+			var id = toCamel(data.tableName.replace(_tablePrefix, 'SELECT_'));
 
 			var tmplData = {
 				id: id,
@@ -111,20 +122,22 @@
 				tableName: data.tableName
 			};
 
-			return Mustache.render(jsql.selectQueryTmpl(), tmplData);
+			return Mustache.render(that.selectQueryTmpl(), tmplData);
 		});
 
 	};
 
 
-	jsql.insertQuery = function (data) {
+	this.insertQuery = function (data) {
 
 		if (!data.owner || !data.tableName) {
 			alert('owner, tableName을 입력해주세요.');
 			return;
 		}
 
-		return jsql.findColumnInfo(data).then(function (columns) {
+		var that = this;
+
+		return this.findColumnInfo(data).then(function (columns) {
 
 			columns = columns.result;
 
@@ -136,7 +149,7 @@
 				return '#{' + arr[1] + '}';
 			}).join(',\n    ');
 
-			var id = toCamel(data.tableName.replace(jsql.TABLE_PREFIX, 'INSERT_'));
+			var id = toCamel(data.tableName.replace(_tablePrefix, 'INSERT_'));
 
 			var tmplData = {
 				id: id,
@@ -145,20 +158,22 @@
 				tableName: data.tableName
 			};
 
-			return Mustache.render(jsql.insertQueryTmpl(), tmplData);
+			return Mustache.render(that.insertQueryTmpl(), tmplData);
 		});
 
 	};
 
 
-	jsql.updateQuery = function (data) {
+	this.updateQuery = function (data) {
 
 		if (!data.owner || !data.tableName) {
 			alert('owner, tableName을 입력해주세요.');
 			return;
 		}
 
-		return Promise.all([jsql.findColumnInfo(data), jsql.findIndexesInfo(data)]).then(function (returnValue) {
+		var that = this;
+
+		return Promise.all([this.findColumnInfo(data), this.findIndexesInfo(data)]).then(function (returnValue) {
 
 			var columns = returnValue[0].result,
 				indexes = returnValue[1].result;
@@ -171,7 +186,7 @@
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(jsql.TABLE_PREFIX, 'UPDATE_'));
+			var id = toCamel(data.tableName.replace(_tablePrefix, 'UPDATE_'));
 
 			var tmplData = {
 				id: id,
@@ -180,19 +195,21 @@
 				tableName: data.tableName
 			};
 
-			return Mustache.render(jsql.updateQueryTmpl(), tmplData);
+			return Mustache.render(that.updateQueryTmpl(), tmplData);
 		});
 
 	};
 
-	jsql.deleteQuery = function (data) {
+	this.deleteQuery = function (data) {
 
 		if (!data.owner || !data.tableName) {
 			alert('owner, tableName을 입력해주세요.');
 			return;
 		}
 
-		return jsql.findIndexesInfo(data).then(function (indexes) {
+		var that = this;
+
+		return this.findIndexesInfo(data).then(function (indexes) {
 
 			indexes = indexes.result;
 
@@ -200,7 +217,7 @@
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(jsql.TABLE_PREFIX, 'DELETE_'));
+			var id = toCamel(data.tableName.replace(_tablePrefix, 'DELETE_'));
 
 			var tmplData = {
 				id: id,
@@ -208,13 +225,13 @@
 				tableName: data.tableName
 			};
 
-			return Mustache.render(jsql.deleteQueryTmpl(), tmplData);
+			return Mustache.render(that.deleteQueryTmpl(), tmplData);
 		});
 
 	};
 
 
-	jsql.selectQueryTmpl = function () {
+	this.selectQueryTmpl = function () {
 		var result =
 			`
 SELECT /* comment */
@@ -226,7 +243,7 @@ SELECT /* comment */
 	};
 
 
-	jsql.insertQueryTmpl = function () {
+	this.insertQueryTmpl = function () {
 		var result =
 			`
 INSERT /* comment */
@@ -243,7 +260,7 @@ VALUES
 	};
 
 
-	jsql.updateQueryTmpl = function () {
+	this.updateQueryTmpl = function () {
 		var result =
 			`
 /* comment */
@@ -254,7 +271,7 @@ UPDATE {{tableName}}
 		return result;
 	};
 
-	jsql.deleteQueryTmpl = function () {
+	this.deleteQueryTmpl = function () {
 
 		var result =
 			`
@@ -281,9 +298,35 @@ DELETE /* comments */
 		});
 	}
 
-	jsql.toCamel = toCamel;
-	jsql.toUnderscore = toUnderscore;
+	function setData(id, value, expires) {
 
-	window.jsql = jsql;
+		expires = parseInt((expires != null ? 7 : expires), 10);
 
-})();
+		var date = new Date();
+
+		date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + expires);
+		document.cookie = id + "=" + window.escape(value) + "; expires=" + date.toGMTString() + "; path=/";
+	}
+
+	function getData(sName) {
+
+		var cookies = document.cookie.split("; ");
+
+		for (var i = 0; i < cookies.length; i++) {
+
+			var crumb = cookies[i].split("=");
+
+			if (sName == crumb[0]) {
+				return crumb[1] != null ? unescape(crumb[1]) : "";
+			}
+		}
+
+		return "";
+	}
+
+	this.toCamel = toCamel;
+	this.toUnderscore = toUnderscore;
+
+	this.setData = setData;
+	this.getData = getData;
+}

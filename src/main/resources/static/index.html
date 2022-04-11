@@ -11,33 +11,100 @@
 
 		}
 
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		#container {
+			display: flex;
+			flex-direction: row;
+			width: 100%;
+			height: 100%;
+		}
+
+		.side {
+			flex-grow: 0;
+			flex-shrink: 1;
+			display: flex;
+			flex-direction: column;
+			padding: 15px;
+			max-width: 500px;
+		}
+
+		.side #tableArea {
+			flex-grow: 1;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.queryArea {
+			flex-grow: 1;
+			margin-top: 5px;
+		}
+
+		.resultArea {
+			margin-top: 15px;
+			width: 100%;
+			height: 350px;
+			overflow: auto;
+		}
+
+		.main {
+			flex-grow: 1;
+			flex-shrink: 1;
+			display: flex;
+			flex-direction: column;
+			padding: 15px;
+			overflow: auto;
+			min-width: 500px;
+		}
+
+		#sqlText {
+			width: 99%;
+			min-width: 100%;
+			height: 100%;
+			box-sizing: border-box;
+		}
+
 		table {
 			border-collapse: separate;
 			border-spacing: 0px;
 			width: 100%;
 		}
 
-		tr:first-child td {
+		tr th {
 			border-top: 1px solid black;
 		}
 
+		tr th:first-child,
 		tr td:first-child {
 			border-left: 1px solid black;
 		}
 
+		th,
 		td {
 			border-bottom: 1px solid black;
 			border-right: 1px solid black;
 			white-space: nowrap;
 		}
 
-		tr.metadata {
+		tr th {
 			background-color: silver;
 		}
 
-		#tableList tr:hover {
+		.table tr:hover {
 			background-color: lime;
-			cursor: pointer;
+			cursor: default;
+		}
+
+		.table tr.active {
+			background-color: lightblue;
+			cursor: default;
 		}
 	</style>
 	<script type="text/javascript" src="lib/jquery-3.4.1.js"></script>
@@ -49,15 +116,20 @@
 </head>
 
 <body>
-	<div id="container" style="height: 700px;">
-		<div style="float: left; width: 20%;">
+	<div id="container">
+		<div class="side">
 			<div id="tableArea">
 				<div>
-					<input type="text" id="txtOwner" value="SEIZE_ORG">
+					<select id="selVendor" caching>
+						<option value="">Vendor</option>
+						<option value="oracle">oracle</option>
+						<option value="db2">db2</option>
+					</select>
+					<input type="text" id="txtOwner" caching>
 					<input type="text" id="txtTableName">
 					<button id="btnFindTable" class="selection">find</button>
 				</div>
-				<div id="tableList" style="margin-top: 15px; height: 500px; overflow: auto;"></div>
+				<div id="tables" style="margin-top: 15px; overflow: auto;"></div>
 			</div>
 			<div id="columnArea" style="margin-top: 15px;">
 				<div>
@@ -71,20 +143,18 @@
 					<button id="btnUpdate">update</button>
 					<button id="btnDelete">delete</button>
 				</div>
-				<div id="comments" style="margin-top: 5px; height: 300px; overflow: auto;"></div>
+				<div id="columns" style="margin-top: 5px; height: 300px; overflow: auto;"></div>
 			</div>
 		</div>
-		<div id="sqlArea" style="margin-left: 21%; height: 100%;">
-			<div style="margin-top: 15px;">
+		<div class="main">
+			<div>
 				<button id="runSql">run</button>
 			</div>
-			<div style="margin-top: 5px; height: 300px;">
-				<textarea id="sqlText" style="width: 99%; min-width: 100%; height: 100%;"></textarea>
+			<div class="queryArea">
+				<textarea id="sqlText" caching></textarea>
 			</div>
-			<div style="margin-top: 15px;">
-				<div id="resultArea" class="resultArea" style="width: 100%; height: 350px; overflow: auto;"></div>
-				<div><span id="rowCount"></span> fetched rows</div>
-			</div>
+			<div id="resultArea" class="resultArea"></div>
+			<div><span id="rowCount"></span> fetched rows</div>
 		</div>
 	</div>
 </body>
