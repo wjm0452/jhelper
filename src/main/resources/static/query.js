@@ -74,7 +74,9 @@
 
 		$('#selVendor').on('change', function () {
 			jsql.loadTemplate(this.value).then(function () {
-				$('#tableArea').find('#btnFindTable').trigger('click');
+				if ($('#txtOwner').val()) {
+					$('#tableArea').find('#btnFindTable').trigger('click');
+				}
 			});
 		})
 
@@ -229,7 +231,7 @@
 			}
 		});
 
-		if ($('#selVendor').val() && $('#txtOwner').val()) {
+		if ($('#selVendor').val()) {
 			$('#selVendor').trigger('change');
 		}
 	});
