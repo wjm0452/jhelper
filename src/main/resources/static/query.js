@@ -216,24 +216,27 @@
 			jsql.setData(id, this.value);
 		});
 
-		$('[caching]').each(function (e) {
-
+		var promises = $('[caching]').map(function () {
 			var id = this.id;
 
 			if (!id) {
 				return;
 			}
 
-			var value = jsql.getData(id);
-
-			if (value) {
-				this.value = value;
-			}
+			var that = this;
+			return jsql.getData(id).then(function (value) {
+				if (value != null) {
+					that.value = value;
+				}
+			});
 		});
 
-		if ($('#selVendor').val()) {
-			$('#selVendor').trigger('change');
-		}
+
+		Promise.all(promises).then(function () {
+			if ($('#selVendor').val()) {
+				$('#selVendor').trigger('change');
+			}
+		});
 	});
 
 	function createSQLTokenizer(sql) {

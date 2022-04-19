@@ -1,7 +1,9 @@
 function Jsql(options) {
 
 	var _tablePrefix = '';
-	var _url = '/api/sql';
+	var _url = '/api/sql',
+		_cacheUrl = '/api/cache';
+
 
 	if (options.tablePrefix) {
 		_tablePrefix = options.tablePrefix;
@@ -300,35 +302,75 @@ DELETE /* comments */
 		});
 	}
 
-	function setData(id, value, expires) {
-
-		expires = parseInt((expires != null ? 7 : expires), 10);
-
-		var date = new Date();
-
-		date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + expires);
-		document.cookie = id + "=" + window.escape(value) + "; expires=" + date.toGMTString() + "; path=/";
+	function setData(key, value) {
+		axios.post(_cacheUrl, {
+			key: key,
+			value: value
+		}).then(function (res) {
+			return res.data;
+		});
 	}
 
-	function getData(sName) {
-
-		var cookies = document.cookie.split("; ");
-
-		for (var i = 0; i < cookies.length; i++) {
-
-			var crumb = cookies[i].split("=");
-
-			if (sName == crumb[0]) {
-				return crumb[1] != null ? unescape(crumb[1]) : "";
-			}
-		}
-
-		return "";
+	function getData(key) {
+		return axios.get(_cacheUrl + '/' + key).then(function (res) {
+			var data = res.data;
+			return data && data.value != null ? res.data.value : null;
+		});
 	}
 
 	this.toCamel = toCamel;
 	this.toUnderscore = toUnderscore;
 
-	this.setData = setData;
+	this.setData = debounce(setData, 500);
 	this.getData = getData;
+
+	/**
+	 * 여러번 실행시 가장 마지막 이벤트만 실행한다.
+	 * 마지막 이벤트의 wait만큼 대기 후 실행
+	 * 
+	 * @param {Function} func 
+	 * @param {number} wait 
+	 * @param {boolean} immediate 
+	 */
+	function debounce(func, wait, immediate) {
+
+		var timerId,
+			context,
+			args;
+
+		var callback = function () {
+			if (!immediate) {
+				func.apply(context, args);
+			}
+
+			timerId = null;
+		};
+
+		var _debounce = function () {
+
+			context = this;
+			args = arguments;
+
+			var callNow = immediate && !timerId;
+
+			if (timerId) {
+				window.clearTimeout(timerId);
+			}
+
+			timerId = window.setTimeout(callback, wait);
+
+			if (callNow) {
+				func.apply(context, args);
+			}
+		};
+
+		_debounce.cancel = function () {
+			if (timerId) {
+				window.clearTimeout(timerId);
+				timerId = null;
+			}
+		};
+
+		return _debounce;
+	}
 }

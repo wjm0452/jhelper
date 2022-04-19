@@ -10,6 +10,7 @@ import com.jhelper.jserve.web.entity.SqlVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -25,6 +26,7 @@ public class SqlHelperController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
+    @Qualifier("sqlHelperJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public SqlVO select(final String sql, String[] params) {
