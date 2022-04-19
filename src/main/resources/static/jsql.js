@@ -303,7 +303,7 @@ DELETE /* comments */
 	}
 
 	function setData(key, value) {
-		axios.post(_cacheUrl, {
+		return axios.post(_cacheUrl, {
 			key: key,
 			value: value
 		}).then(function (res) {
