@@ -111,16 +111,13 @@ function Jsql(options) {
 
 			var coltext = columns.map(function (arr, idx) {
 				return arr[1] + ' /* ' + arr[2] + ' */';
-			}).join(',\n       ');
+			}).join('\n      ,');
 
 			var idxtext = indexes.map(function (arr, idx) {
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(_tablePrefix, 'SELECT_'));
-
 			var tmplData = {
-				id: id,
 				columns: coltext,
 				indexes: ' WHERE ' + idxtext,
 				tableName: data.tableName
@@ -147,16 +144,13 @@ function Jsql(options) {
 
 			var coltext = columns.map(function (arr, idx) {
 				return arr[1] + ' /* ' + arr[2] + ' */';
-			}).join(',\n    ');
+			}).join('\n   ,');
 
 			var values = columns.map(function (arr, idx) {
 				return '#{' + arr[1] + '}';
-			}).join(',\n    ');
-
-			var id = toCamel(data.tableName.replace(_tablePrefix, 'INSERT_'));
+			}).join('\n   ,');
 
 			var tmplData = {
-				id: id,
 				columns: coltext,
 				values: values,
 				tableName: data.tableName
@@ -184,16 +178,13 @@ function Jsql(options) {
 
 			var coltext = columns.map(function (arr, idx) {
 				return arr[1] + ' = #{' + arr[1] + '}' + ' /* ' + arr[2] + ' */';
-			}).join(',\n       ');
+			}).join('\n      ,');
 
 			var idxtext = indexes.map(function (arr, idx) {
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(_tablePrefix, 'UPDATE_'));
-
 			var tmplData = {
-				id: id,
 				columns: coltext,
 				indexes: ' WHERE ' + idxtext,
 				tableName: data.tableName
@@ -221,10 +212,7 @@ function Jsql(options) {
 				return arr[0] + ' = #{' + arr[0] + '}';
 			}).join('\n   AND ');
 
-			var id = toCamel(data.tableName.replace(_tablePrefix, 'DELETE_'));
-
 			var tmplData = {
-				id: id,
 				indexes: ' WHERE ' + idxtext,
 				tableName: data.tableName
 			};
