@@ -241,13 +241,15 @@
 
 	function createSQLTokenizer(sql) {
 
-		var cus = {};
-		cus["/*"] = "*/";
-		cus["/*+"] = "*/";
-		cus["//"] = "\n";
-		cus["\'"] = "\'";
+		var customToken = {};
+		customToken["/*"] = "*/";
+		customToken["/*+"] = "*/";
+		customToken["//"] = "\n";
+		customToken["\'"] = "\'";
+		customToken["#{"] = "}";
+		customToken["${"] = "}";
 
-		return new TextTokenizer(sql, cus);
+		return new TextTokenizer(sql, customToken);
 	}
 
 	function printSql(sql) {

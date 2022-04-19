@@ -9,6 +9,10 @@ function TextTokenizer(text, customToken) {
 		_customToken = customToken;
 	}
 
+	this.isKor = function (c) {
+		return c >= 'ㄱ' && c <= '힣';
+	};
+
 	this.isAlphaNumeric = function (c) {
 
 		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
@@ -17,7 +21,7 @@ function TextTokenizer(text, customToken) {
 			return true;
 		}
 
-		return false;
+		return this.isKor(c);
 	};
 
 	this.remaning = function () {
@@ -59,10 +63,10 @@ function TextTokenizer(text, customToken) {
 
 	this.next = function () {
 
-		for (var key in this._customToken) {
+		for (var key in _customToken) {
 
 			let begin = key,
-				end = this._customToken[key];
+				end = _customToken[key];
 
 			let c = this.get(1);
 
@@ -77,7 +81,7 @@ function TextTokenizer(text, customToken) {
 					c = this.get();
 
 					if (end.charAt(0) == c) {
-						if (end == this.getString(end.length())) {
+						if (end == this.getString(end.length)) {
 							break;
 						}
 					}
