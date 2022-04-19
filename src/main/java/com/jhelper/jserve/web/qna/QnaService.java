@@ -23,6 +23,7 @@ public class QnaService {
     }
 
     public QnaVO create(QnaVO qnaVO) {
+        qnaVO.setRegisterId("wjm");
         qnaVO.setRegisterDate(new Date());
         return qnaRepository.save(qnaVO);
     }
