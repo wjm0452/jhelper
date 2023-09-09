@@ -1,6 +1,6 @@
 package com.jhelper.jserve.web;
 
-import com.jhelper.jserve.web.entity.RestProxyVO;
+import com.jhelper.jserve.web.entity.RestProxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class RestProxyController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @PostMapping("/")
-    public RestProxyVO restProxy(@RequestBody RestProxyVO restProxyVO) {
+    public RestProxy restProxy(@RequestBody RestProxy restProxyVO) {
 
         logger.debug("url: {}", restProxyVO.getUrl());
         logger.debug("method: {}", restProxyVO.getMethod());
@@ -42,7 +42,7 @@ public class RestProxyController {
                 HttpMethod.resolve(restProxyVO.getMethod()), requestEntity,
                 String.class, restProxyVO.getParams());
 
-        RestProxyVO result = new RestProxyVO();
+        RestProxy result = new RestProxy();
 
         result.setHeaders(responseEntity.getHeaders().toSingleValueMap());
         result.setBodyValue(responseEntity.getBody());

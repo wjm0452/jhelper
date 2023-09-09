@@ -39,7 +39,6 @@ public class DataSourceConfig {
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
-
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "com.jhelper.jserve.jdbc.SQLiteDialect");
         properties.setProperty("hibernate.hbm2ddl.auto", "update");

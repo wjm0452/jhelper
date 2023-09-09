@@ -1,19 +1,18 @@
 package com.jhelper.jserve.web;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import com.jhelper.jserve.web.entity.SqlVO;
+import com.jhelper.jserve.web.sql.SqlHelperService;
+import com.jhelper.jserve.web.sql.model.QueryVO;
+import com.jhelper.jserve.web.sql.model.SqlError;
+import com.jhelper.jserve.web.sql.model.SqlResult;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,46 +25,49 @@ public class SqlHelperController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    @Qualifier("sqlHelperJdbcTemplate")
-    JdbcTemplate jdbcTemplate;
+    SqlHelperService sqlHelperService;
 
-    public SqlVO select(final String sql, String[] params) {
+    @ExceptionHandler(SQLServerException.class)
+    public ResponseEntity<SqlError> sqlServerError(SQLServerException e) {
 
-        logger.debug("sql: {}", sql);
+        SqlError sqlError = new SqlError();
 
-        List<String[]> resultList = new ArrayList<String[]>();
+        sqlError.setSqlState(e.getSQLState());
+        sqlError.setErrorMessage(e.getSQLServerError().getErrorMessage());
 
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, params);
+        return ResponseEntity
+                .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(sqlError);
+    }
 
-        SqlRowSetMetaData sqlRowSetMetaData = sqlRowSet.getMetaData();
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<SqlError> runtimeError(RuntimeException e) {
 
-        final String[] columnNames = sqlRowSetMetaData.getColumnNames();
-        final int columnSize = columnNames.length;
+        SqlError sqlError = new SqlError();
 
-        while (sqlRowSet.next()) {
+        sqlError.setSqlState("RUN");
+        sqlError.setErrorMessage(e.getMessage());
 
-            String[] columns = new String[columnSize];
-
-            for (int i = 0; i < columnSize; i++) {
-                columns[i] = sqlRowSet.getString(i + 1);
-            }
-
-            resultList.add(columns);
-        }
-
-        SqlVO sqlVO = new SqlVO();
-        sqlVO.setColumnNames(columnNames);
-        sqlVO.setResult(resultList.toArray(new String[0][]));
-
-        return sqlVO;
+        return ResponseEntity
+                .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(sqlError);
     }
 
     @PostMapping
-    public SqlVO query(@RequestBody Map<String, ?> params) {
+    public SqlResult query(@RequestBody QueryVO queryVo) throws SQLServerException {
+        try {
+            return sqlHelperService.execute(queryVo);
+        } catch (DataAccessException e) {
+            Throwable cause = e.getCause();
 
-        String query = Objects.toString(params.get("query"));
-        String[] data = (String[]) params.get("data");
+            if (cause instanceof SQLServerException) {
+                SQLServerException sqlServerException = ((SQLServerException) cause);
+                throw sqlServerException;
+            }
 
-        return select(query, data);
+            throw e;
+        }
     }
 }

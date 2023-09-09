@@ -1,12 +1,13 @@
 plugins {
-	id 'org.springframework.boot' version '2.6.6'
+	id 'org.springframework.boot' version '3.1.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 }
 
 group = 'com.jhelper'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 configurations {
 	compileOnly {
@@ -25,52 +26,27 @@ dependencies {
 	implementation 'org.springframework.session:spring-session-core'
 	implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
 	implementation 'com.oracle.ojdbc:ojdbc8:19.3.0.0'
+	implementation 'com.ibm.db2.jcc:db2jcc:db2jcc4'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.3.0.jre17-preview'
+	implementation 'org.apache.poi:poi:5.2.3'
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-// frontend
-def webappDir = "$projectDir/frontend"
-
 sourceSets {
 	main {
 		resources {
-			srcDirs = ["$webappDir/build", "$projectDir/src/main/resources"]
+			srcDirs = [ "$projectDir/src/main/resources"]
 		}
 	}
 }
-
-processResources {
-	dependsOn "buildFrontEnd"
-}
-
-task buildFrontEnd(type: Exec) {
-	dependsOn "installNpm"
-	workingDir "$webappDir"
-	inputs.dir "$webappDir"
-	group = BasePlugin.BUILD_GROUP
-	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine "npm.cmd", "run-script", "build"
-	} else {
-		commandLine "npm", "run-script", "build"
-	}
-}
-
-task installNpm(type: Exec) {
-	workingDir "$webappDir"
-	inputs.dir "$webappDir"
-	group = BasePlugin.BUILD_GROUP
-	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine "npm.cmd", "audit", "fix"
-		commandLine 'npm.cmd', 'install'
-	} else {
-		commandLine "npm", "audit", "fix"
-		commandLine 'npm', 'install'
-	}
-}
-// -frontend
 
 tasks.named('test') {
 	useJUnitPlatform()

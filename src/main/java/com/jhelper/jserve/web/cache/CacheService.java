@@ -2,7 +2,7 @@ package com.jhelper.jserve.web.cache;
 
 import java.util.List;
 
-import com.jhelper.jserve.web.entity.CacheVO;
+import com.jhelper.jserve.web.entity.Cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +13,16 @@ public class CacheService {
     @Autowired
     CacheRepository cacheRepository;
 
-    public List<CacheVO> findAll() {
+    public List<Cache> findAll() {
         return cacheRepository.findAll();
     }
 
-    public CacheVO findById(String id) {
+    public Cache findById(String id) {
         return cacheRepository.findById(id).orElse(null);
     }
 
-    public CacheVO save(CacheVO cacheVO) {
-        return cacheRepository.save(cacheVO);
+    public Cache save(Cache cache) {
+        return cacheRepository.save(cache);
     }
 
     public void delete(String id) {

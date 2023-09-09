@@ -1,0 +1,70 @@
+<root>
+    <sql id="table">
+        select table_name as TABLE_NAME,
+               comments as COMMENTS
+          from (select b.name as table_name,
+                       (select cast(value as varchar) from ::fn_listextendedproperty(null, 'schema', a.name, 'table', b.name, default, default)) as comments
+                  from sys.schemas a
+                  join sys.tables b
+                    on a.schema_id = b.schema_id
+                 where a.name = '{{owner}}') a
+         where 1=1
+         {{#tableName}}
+           and (table_name = '{{tableName}}' OR comments LIKE '%' + '{{tableName}}' + '%')
+         {{/tableName}}
+         order by table_name
+    </sql>
+    <sql id="columns">
+        select table_name as TABLE_NAME,
+               column_name as COLUMN_NAME,
+               comments as COMMENTS,
+               data_type as DATA_TYPE,
+               data_length as DATA_LENGTH
+          from (select b.name as table_name,
+                       (select cast(value as varchar) from ::fn_listextendedproperty(null, 'schema', a.name, 'table', b.name, default, default)) as table_comments,
+                       c.name as column_name,
+                       c.column_id,
+                       (select cast(value as varchar) from ::fn_listextendedproperty(null, 'schema', a.name, 'table', b.name, 'column', default)) as comments,
+                       (select name from sys.systypes where xusertype = c.user_type_id) as data_type,
+                       c.max_length as data_length,
+                       c.precision,
+                       c.scale,
+                       c.is_nullable
+                  from sys.schemas a
+                  join sys.tables b
+                    on a.schema_id = b.schema_id
+                  join sys.columns c
+                    on b.object_id = c.object_id
+                 where a.name = '{{owner}}') a
+         where 1=1
+         {{#tableName}}
+         and (table_name = '{{tableName}}' OR table_comments LIKE '%' + '{{tableName}}' + '%')
+         {{/tableName}}
+         {{#columnName}}
+         and (column_name = '{{columnName}}' OR comments LIKE '%' + '{{columnName}}' + '%')
+         {{/columnName}}
+         order by a.column_id asc
+    </sql>
+    <sql id="indexes">
+        select e.name as INDEX_COLUMN
+          from sys.schemas a
+          join sys.tables b
+            on a.schema_id = b.schema_id
+          join sys.indexes c
+            on b.object_id = c.object_id
+           and c.is_primary_key = 1
+          join sys.index_columns d
+            on b.object_id = d.object_id
+           and c.index_id = d.index_id
+          join sys.columns e
+            on b.object_id = e.object_id
+           and d.column_id = e.column_id
+         where a.name = '{{owner}}'
+           and b.name = '{{tableName}}'
+         order by e.column_id asc
+    </sql>
+    <sql id="schema">
+      select name AS NAME
+        from sys.schemas
+    </sql>
+</root>
